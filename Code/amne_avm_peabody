@@ -34,7 +34,7 @@ def main():
     print('Great. Now we just need some details about your house.')
     bedrooms = int(input('How many bedrooms does it have? '))
     bathrooms = int(input('How many bathrooms does it have? '))
-    sqft_living = int(input('How many square feet is it? ' ))
+    sqft_above = int(input('How many square feet is it? ' ))
     floors = float(input('How many floors does it have? '))
     waterfront = int(input('Does it have a view of the water? (1=Yes, 0=No) '))
     sqft_basement = int(input('How many square feet is the basement? (0 if no basement) '))
@@ -46,7 +46,7 @@ def main():
     #------------------------------------
     # Check for data that the model was not trained on
     
-    if bedrooms > 20 | sqft_living > 7000 | sqft_lot15 > 20000:
+    if bedrooms > 20 | sqft_above> 7000 | sqft_lot15 > 20000:
         print('This property cannot be safely modeled')
         sys.exit(0)
     
@@ -57,7 +57,7 @@ def main():
     lon_q = lon_lat[0]
     lat_q = lon_lat[1]
     
-    X_input = np.reshape([bedrooms, bathrooms, sqft_living, floors, waterfront, 
+    X_input = np.reshape([bedrooms, bathrooms, sqft_above, floors, waterfront, 
                sqft_basement, yr_built, lat_q, lon_q, sqft_lot15, month,
                renovated], (1, -1))
     
