@@ -27,6 +27,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 #------------------------------------------------------------------------------
 def main():
     
+    #------------------------------------
     # Get user inputs
     
     address = input('What is your address? ')
@@ -42,16 +43,16 @@ def main():
     renovated = int(input('Has it ever been renovated? (1=Yes, 0=No) '))
     month = datetime.datetime.now().month
     
-    
-    
-    
-    
+    #------------------------------------
+    # Check for data that the model was not trained on
     
     if bedrooms > 20 | sqft_living > 7000 | sqft_lot15 > 20000:
         print('This property cannot be safely modeled')
         sys.exit(0)
     
+    #------------------------------------
     # Convert user address to lat and lon
+    
     lon_lat = get_geocode(address)
     lon_q = lon_lat[0]
     lat_q = lon_lat[1]
@@ -64,6 +65,7 @@ def main():
     df = pd.read_csv('../Data/King_County/kc_house_data_cleaned.csv')
     df.drop('Unnamed: 0', axis = 1, inplace = True)
     
+    #------------------------------------
     # Find distance between address and all other properties
     
     distance = []
@@ -74,20 +76,26 @@ def main():
         distance.append(d)
     df['distance'] = distance
     
+    #------------------------------------
     # Find optimal radius for queried property
+    
     [idx_ols, idx_gbr] = get_optimal_r(lon_q, lat_q, df)
     
     #------------------------------------
     # Build OLS model using optimal radii
+    
     d_q = [i*int(1e3) for i in range(1, 40)]
     
+    #------------------------------------
     # Get all properties within r_ols of queried location
+    
     idx = df['distance'] <= d_q[idx_ols]
     df_local = df[idx]
     X_local = df_local.drop(['price', 'distance'], axis = 1).values
     y_local = df_local['price'].values
     
     # Train OLS model
+    
     lin_reg = linear_model.LinearRegression()
     lin_reg.fit(X_local, y_local)
     y_pred_ols = float(lin_reg.predict(X_input))
@@ -108,15 +116,15 @@ def main():
     gbr.fit(X_local, y_local)
     y_pred_gbr = float(gbr.predict(X_input))
     
+    #------------------------------------
     # Return estimate
-    print('Your home is worth around $', int(np.mean([y_pred_gbr,
-                                                        y_pred_ols])*732/427))
+    
+    print('Here are two estimates of your home\'s selling price: $',
+          int(y_pred_ols*732/427), ' and $', int(y_pred_gbr*732/427))
+    
     # The above introduces the scaling factor, based on the ratio of median 
     # home prices in March 2018 to median home prices in December 2014
     return [y_pred_ols*732/427, y_pred_gbr*732/427]
-    
-    
-
     
 #------------------------------------------------------------------------------
 # get_geocode returns (lon, lat), returned from the google maps API
